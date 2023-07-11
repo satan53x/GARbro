@@ -322,6 +322,9 @@
     <Compile Include="MicroVision\ImageGPC.cs" />
     <Compile Include="Morning\ArcPAK.cs" />
     <Compile Include="PackedStream.cs" />
+    <Compile Include="Pajamas\CreateGameDatWidget.xaml.cs">
+      <DependentUpon>CreateGameDatWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Palette\ArcPAK2.cs" />
     <Compile Include="PalmTree\ArcAR.cs" />
     <Compile Include="PkWare\WidgetZIP.xaml.cs">
@@ -1136,6 +1139,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="NSystem\WidgetMSD.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pajamas\CreateGameDatWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
