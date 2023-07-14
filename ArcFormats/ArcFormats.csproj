@@ -252,7 +252,11 @@
     <Compile Include="Leaf\WidgetLEAF.xaml.cs">
       <DependentUpon>WidgetLEAF.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Lilim\HuffmanEncoder.cs" />
     <Compile Include="Lilim\ImageIMG.cs" />
+    <Compile Include="Lilim\CreateAOSWidget.xaml.cs">
+      <DependentUpon>CreateAOSWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveMaker\ArcGALX.cs" />
     <Compile Include="Aims\ArcPACK.cs" />
     <Compile Include="Lzma\ICoder.cs" />
@@ -1099,6 +1103,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Leaf\WidgetLEAF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Lilim\CreateAOSWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

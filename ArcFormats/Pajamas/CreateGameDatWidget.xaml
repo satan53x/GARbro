@@ -8,7 +8,7 @@
         <ColumnDefinition/>
     </Grid.ColumnDefinitions>
     <Label Content="Version" Target="{Binding ElementName=Version}" Grid.Column="0" Margin="0"/>
-    <ComboBox Name="Version" Width="40" SelectedValuePath="Content" Grid.Column="1" Margin="8"
+    <ComboBox Name="Version" Width="40" SelectedValuePath="Content" Grid.Column="1" Margin="0"
               SelectedValue="{Binding Source={x:Static p:Settings.Default}, Path=GameDatVersion, Mode=TwoWay}">
         <ComboBoxItem Content="1"/>
         <ComboBoxItem Content="2"/>

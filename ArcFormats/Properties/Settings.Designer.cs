@@ -813,5 +813,17 @@ namespace GameRes.Formats.Properties {
                 this["GameDatVersion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("scr.aos")]
+        public string AOSDescription {
+            get {
+                return ((string)(this["AOSDescription"]));
+            }
+            set {
+                this["AOSDescription"] = value;
+            }
+        }
     }
 }

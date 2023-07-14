@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Text;
 using GameRes.Compression;
 
 namespace GameRes.Formats.Lilim
@@ -108,7 +109,7 @@ namespace GameRes.Formats.Lilim
         public override string Description { get { return "LiLiM resource archive version 2"; } }
         public override uint     Signature { get { return 0; } }
         public override bool  IsHierarchic { get { return false; } }
-        public override bool      CanWrite { get { return false; } }
+        public override bool      CanWrite { get { return true; } }
 
         public Aos2Opener ()
         {
@@ -154,5 +155,104 @@ namespace GameRes.Formats.Lilim
             }
             return new ArcFile (file, this, dir);
         }
+
+        public override void Create(Stream output, IEnumerable<Entry> list, ResourceOptions options,
+                                     EntryCallback callback)
+        {
+            int file_count = list.Count();
+            if (null != callback)
+                callback(file_count + 2, null, null);
+            //int callback_count = 0;
+            using (var writer = new BinaryWriter(output, Encoding.ASCII, true))
+            {
+                var encoding = Encodings.cp932;
+                byte[] name_buf = new byte[0x100];
+                Int32 i32 = 0;
+                writer.Write(i32);
+
+                uint count = (uint)list.Count();
+                uint index_offset = 0x111;
+                uint index_size = count * 0x28;
+                uint base_offset = index_offset + index_size;
+                writer.Write(base_offset);
+                writer.Write(index_size);
+                // description
+                var arc_options = GetOptions<ArcOptions>(options);
+                encoding.GetBytes(arc_options.Description, 0, arc_options.Description.Length, name_buf, 0);
+                writer.Write(name_buf, 0, name_buf.Length);
+
+                // data section
+                writer.BaseStream.Position = base_offset;
+                foreach (var entry in list)
+                {
+                    entry.Offset = base_offset;
+                    using (var input = File.OpenRead(entry.Name))
+                    {
+                        var name = Path.GetFileName(entry.Name);
+                        uint size = (uint)input.Length;
+                        if (size > uint.MaxValue || base_offset + size > uint.MaxValue)
+                        {
+                            throw new FileSizeException();
+                        }
+                        bool tryPack = false;
+                        if (name.HasExtension(".scr"))
+                        {
+                            tryPack = true;
+                        }
+                        else if (name.HasExtension(".abm"))
+                        {
+                            tryPack = true;
+                            entry.Name = Path.ChangeExtension(entry.Name, ".cmp");
+                        }
+                        if (tryPack)
+                        {
+                            byte[] unpacked = new byte[input.Length];
+                            input.Read(unpacked, 0, (int)input.Length);
+                            byte[] packed = HuffmanEncoder.HuffmanEncoding(unpacked);
+                            writer.Write(unpacked.Length);
+                            writer.Write(packed, 0, packed.Length);
+                            size = 4 + (uint)packed.Length;
+                        }
+                        else
+                        {
+                            input.CopyTo(output);
+                        }
+                        base_offset += size;
+                        entry.Size = size;
+                    }
+                }
+
+                // index section
+                writer.BaseStream.Position = index_offset;
+                base_offset = index_offset + index_size;
+                foreach (var entry in list)
+                {
+                    writer.BaseStream.Position = index_offset;
+                    var name = Path.GetFileName(entry.Name);
+                    int size = encoding.GetBytes(name, 0, name.Length, name_buf, 0);
+                    for (int i = size; i < 0x20; ++i)
+                        name_buf[i] = 0;
+                    writer.Write(name_buf, 0, 0x20);
+                    writer.Write((uint)(entry.Offset - base_offset));
+                    writer.Write(entry.Size);
+                    index_offset += 0x28;
+                }
+            }
+        }
+
+        public override object GetCreationWidget()
+        {
+            return new GUI.CreateAOSWidget();
+        }
+
+        public override ResourceOptions GetDefaultOptions()
+        {
+            return new ArcOptions { Description = Properties.Settings.Default.AOSDescription };
+        }
+    }
+
+    public class ArcOptions : ResourceOptions
+    {
+        public string Description { get; set; }
     }
 }
