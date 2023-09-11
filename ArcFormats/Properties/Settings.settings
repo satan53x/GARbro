@@ -206,5 +206,8 @@
     <Setting Name="AFAEncodingCP" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">932</Value>
     </Setting>
+    <Setting Name="ODNVersion" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

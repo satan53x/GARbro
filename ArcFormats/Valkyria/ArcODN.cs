@@ -63,13 +63,13 @@ namespace GameRes.Formats.Valkyria
     [Export(typeof(ArchiveFormat))]
     sealed public class OdnOpener : ArchiveFormat
     {
-        public override string         Tag { get { return "ODN"; } }
+        public override string Tag { get { return "ODN"; } }
         public override string Description { get { return "Valkyria resource archive"; } }
-        public override uint     Signature { get { return 0; } }
-        public override bool  IsHierarchic { get { return false; } }
-        public override bool      CanWrite { get { return false; } }
+        public override uint Signature { get { return 0; } }
+        public override bool IsHierarchic { get { return false; } }
+        public override bool CanWrite { get { return true; } }
 
-        public OdnOpener ()
+        public OdnOpener()
         {
             Settings = new[] { AudioSampleRate };
             Extensions = RequiredExtensions;
@@ -77,43 +77,45 @@ namespace GameRes.Formats.Valkyria
 
         static string[] RequiredExtensions = new[] { "odn", "dat", "pni" };
 
-        FixedSetSetting AudioSampleRate = new FixedSetSetting (Properties.Settings.Default) {
+        FixedSetSetting AudioSampleRate = new FixedSetSetting(Properties.Settings.Default)
+        {
             Name = "ODNAudioSampleRate",
             Text = arcStrings.ODNAudioSampleRate,
             ValuesSet = new[] { 22050u, 44100u },
         };
 
-        public override ArcFile TryOpen (ArcView file)
+        public override ArcFile TryOpen(ArcView file)
         {
-            if (!file.Name.HasAnyOfExtensions (RequiredExtensions))
+            if (!file.Name.HasAnyOfExtensions(RequiredExtensions))
                 return null;
-            var reader = new OdnIndexReader (file);
+            var reader = new OdnIndexReader(file);
             var dir = reader.ReadIndex();
             if (null == dir)
                 return null;
-            return new ArcFile (file, this, dir);
+            return new ArcFile(file, this, dir);
         }
 
-        internal static readonly Regex Image24NameRe = new Regex ("^(?:back|phii|psss)");
-        internal static readonly Regex Image32NameRe = new Regex ("^(?:data|codn|cccc|fund|puni|wind)");
-        internal static readonly Regex ScriptNameRe  = new Regex ("^(?:scrp|menu|sysm)");
-        internal static readonly Regex AudioNameRe   = new Regex ("^hime");
+        internal static readonly Regex Image24NameRe = new Regex("^(?:back|phii|psss)");
+        internal static readonly Regex Image32NameRe = new Regex("^(?:data|codn|cccc|fund|puni|wind)");
+        internal static readonly Regex ScriptNameRe = new Regex("^(?:scrp|menu|sysm)");
+        internal static readonly Regex AudioNameRe = new Regex("^hime");
 
-        public override Stream OpenEntry (ArcFile arc, Entry entry)
+        public override Stream OpenEntry(ArcFile arc, Entry entry)
         {
             var oent = entry as OdnEntry;
             if (oent != null && oent.IsEncrypted)
             {
                 byte key = (byte)~entry.Offset;
-                var data = arc.File.View.ReadBytes (entry.Offset, entry.Size);
-                Decrypt (data, data.Length, key);
-                return new BinMemoryStream (data);
+                var data = arc.File.View.ReadBytes(entry.Offset, entry.Size);
+                Decrypt(data, data.Length, key);
+                return new BinMemoryStream(data);
             }
-            if (AudioNameRe.IsMatch (entry.Name))
+            if (AudioNameRe.IsMatch(entry.Name))
             {
-                using (var wav = new MemoryStream (0x2C))
+                using (var wav = new MemoryStream(0x2C))
                 {
-                    var format = new WaveFormat {
+                    var format = new WaveFormat
+                    {
                         FormatTag = 1,
                         Channels = 1,
                         SamplesPerSecond = AudioSampleRate.Get<uint>(),
@@ -121,48 +123,48 @@ namespace GameRes.Formats.Valkyria
                         BitsPerSample = 16,
                     };
                     format.SetBPS();
-                    WaveAudio.WriteRiffHeader (wav, format, entry.Size);
+                    WaveAudio.WriteRiffHeader(wav, format, entry.Size);
                     var header = wav.ToArray();
-                    var data = arc.File.CreateStream (entry.Offset, entry.Size);
-                    return new PrefixStream (header, data);
+                    var data = arc.File.CreateStream(entry.Offset, entry.Size);
+                    return new PrefixStream(header, data);
                 }
             }
-            var input = arc.File.CreateStream (entry.Offset, entry.Size);
+            var input = arc.File.CreateStream(entry.Offset, entry.Size);
             if (0x5E6A6A42 == input.Signature)
             {
-                return new XoredStream (input, 0xD);
+                return new XoredStream(input, 0xD);
             }
             return input;
         }
 
-        public override IImageDecoder OpenImage (ArcFile arc, Entry entry)
+        public override IImageDecoder OpenImage(ArcFile arc, Entry entry)
         {
-            using (var input = arc.File.CreateStream (entry.Offset, entry.Size))
+            using (var input = arc.File.CreateStream(entry.Offset, entry.Size))
             {
                 int pixel_size;
-                if (Image24NameRe.IsMatch (entry.Name))
+                if (Image24NameRe.IsMatch(entry.Name))
                     pixel_size = 3;
                 else
                     pixel_size = 4;
-                var output = new MemoryStream ((int)entry.Size);
+                var output = new MemoryStream((int)entry.Size);
                 try
                 {
-                    UnpackImage (input, output, pixel_size);
-                    if (entry.Name.StartsWith ("wind") && output.Length == 1024 * 256 * pixel_size)
+                    UnpackImage(input, output, pixel_size);
+                    if (entry.Name.StartsWith("wind") && output.Length == 1024 * 256 * pixel_size)
                     {
                         var info = new ImageMetaData { Width = 1024, Height = 256, BPP = pixel_size * 8 };
-                        return new OdnImageDecoder (output, info);
+                        return new OdnImageDecoder(output, info);
                     }
-                    return CreateImageDecoder (output, pixel_size);
+                    return CreateImageDecoder(output, pixel_size);
                 }
                 catch { /* try different pixel size */ }
                 try
                 {
                     pixel_size ^= 7;
                     input.Position = 0;
-                    output.SetLength (0);
-                    UnpackImage (input, output, pixel_size);
-                    return CreateImageDecoder (output, pixel_size);
+                    output.SetLength(0);
+                    UnpackImage(input, output, pixel_size);
+                    return CreateImageDecoder(output, pixel_size);
                 }
                 catch
                 {
@@ -172,7 +174,7 @@ namespace GameRes.Formats.Valkyria
             }
         }
 
-        internal static byte Decrypt (byte[] data, int size, byte key)
+        internal static byte Decrypt(byte[] data, int size, byte key)
         {
             for (int i = 0; i < size; ++i)
                 data[i] ^= key--;
@@ -190,12 +192,12 @@ namespace GameRes.Formats.Valkyria
             new Size (400, 200),
         };
 
-        void UnpackImage (IBinaryStream input, Stream output, int pixel_size)
+        void UnpackImage(IBinaryStream input, Stream output, int pixel_size)
         {
             var max_output_size = ImageDimensions[0].Width * ImageDimensions[0].Height * pixel_size;
             var pixel = new byte[pixel_size];
             int ctl = 1;
-            for (;;)
+            for (; ; )
             {
                 if (1 == ctl)
                 {
@@ -204,13 +206,13 @@ namespace GameRes.Formats.Valkyria
                         break;
                     ctl |= 0x100;
                 }
-                if (pixel.Length != input.Read (pixel, 0, pixel.Length))
+                if (pixel.Length != input.Read(pixel, 0, pixel.Length))
                     break;
                 int count = 0;
                 if (0 != (ctl & 1))
-                    count = Binary.BigEndian (input.ReadUInt16());
+                    count = Binary.BigEndian(input.ReadUInt16());
                 for (int i = 0; i <= count; ++i)
-                    output.Write (pixel, 0, pixel.Length);
+                    output.Write(pixel, 0, pixel.Length);
                 if (output.Length > max_output_size)
                     throw new InvalidFormatException();
                 ctl >>= 1;
@@ -218,15 +220,100 @@ namespace GameRes.Formats.Valkyria
             output.Position = 0;
         }
 
-        IImageDecoder CreateImageDecoder (Stream image, int pixel_size)
+        IImageDecoder CreateImageDecoder(Stream image, int pixel_size)
         {
-            var size = ImageDimensions.First (s => s.Width * s.Height * pixel_size == image.Length);
-            var info = new ImageMetaData {
+            var size = ImageDimensions.First(s => s.Width * s.Height * pixel_size == image.Length);
+            var info = new ImageMetaData
+            {
                 Width = (uint)size.Width,
                 Height = (uint)size.Height,
                 BPP = pixel_size * 8,
             };
-            return new OdnImageDecoder (image, info);
+            return new OdnImageDecoder(image, info);
+        }
+
+        //封包
+        public override void Create(Stream output, IEnumerable<Entry> list, ResourceOptions options,
+                                     EntryCallback callback)
+        {
+            int file_count = list.Count();
+            using (var writer = new BinaryWriter(output, Encoding.ASCII, true))
+            {
+                long contentStart = (file_count + 1) * 0x10;
+                long contentOffset = contentStart;
+                byte[] indexData = new byte[0x10];
+                OdnIndexWriter indexWriter = new OdnIndexWriter(writer);
+                foreach (var entry in list)
+                {
+                    entry.Offset = contentOffset;
+                    byte key = (byte)~entry.Offset;
+                    using (var input = File.OpenRead(entry.Name))
+                    {
+                        var size = input.Length;
+                        if (size > uint.MaxValue || contentOffset + size > uint.MaxValue)
+                            throw new FileSizeException();
+                        entry.Size = (uint)size;
+                        //写入索引
+                        string name = Path.GetFileName(entry.Name);
+                        long offset = contentOffset - contentStart;
+                        indexWriter.WriteV3(name, offset);
+                        //加密内容
+                        byte[] data = new byte[entry.Size];
+                        input.Read(data, 0, (int)entry.Size);
+                        Decrypt(data, data.Length, key);
+                        //写入内容
+                        writer.BaseStream.Seek(contentOffset, SeekOrigin.Begin);
+                        writer.Write(data, 0, data.Length);
+                        contentOffset += entry.Size;
+                    }
+                }
+                //写入结束索引
+                indexWriter.WriteV3("ffffffff", 0xFFFFFFFF);
+            }
+        }
+
+        public override object GetCreationWidget()
+        {
+            return new GUI.CreateODNWidget();
+        }
+
+        public override ResourceOptions GetDefaultOptions()
+        {
+            return new ArcOptions { Version = Properties.Settings.Default.ODNVersion };
+        }
+    }
+
+    internal sealed class OdnIndexWriter
+    {
+        BinaryWriter m_writer;
+        byte[] m_entry_buf = new byte[0x20];
+        Encoding m_enc;
+        bool m_scripts_encrypted = true;
+        public long m_offset;
+        public byte m_key;
+
+        public OdnIndexWriter(BinaryWriter writer)
+        {
+            m_writer = writer;
+            m_enc = Encoding.ASCII.WithFatalFallback();
+            m_offset = 0;
+            m_key = 0xFF;
+        }
+
+        public void WriteV3(string name, long contentOffset)
+        {
+            m_writer.BaseStream.Seek(m_offset, SeekOrigin.Begin);
+            var ba = m_enc.GetBytes(name.ToCharArray(), 0, 8);
+            ba.CopyTo(m_entry_buf, 0);
+            string s = contentOffset.ToString($"x{8}");
+            ba = m_enc.GetBytes(s.ToCharArray(), 0, 8);
+            ba.CopyTo(m_entry_buf, 8);
+            if (m_scripts_encrypted)
+            {
+                m_key = OdnOpener.Decrypt(m_entry_buf, 0x10, m_key);
+            }
+            m_writer.Write(m_entry_buf, 0, 0x10);
+            m_offset += 0x10;
         }
     }
 
@@ -480,5 +567,10 @@ namespace GameRes.Formats.Valkyria
                 _disposed = true;
             }
         }
+    }
+
+    public class ArcOptions : ResourceOptions
+    {
+        public int Version { get; set; }
     }
 }

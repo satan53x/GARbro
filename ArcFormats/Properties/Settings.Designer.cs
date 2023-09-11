@@ -825,6 +825,7 @@ namespace GameRes.Formats.Properties {
                 this["AOSDescription"] = value;
             }
         }
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("932")]
@@ -834,6 +835,18 @@ namespace GameRes.Formats.Properties {
             }
             set {
                 this["AFAEncodingCP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int ODNVersion {
+            get {
+                return ((int)(this["ODNVersion"]));
+            }
+            set {
+                this["ODNVersion"] = value;
             }
         }
     }

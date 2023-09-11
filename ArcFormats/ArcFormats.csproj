@@ -170,6 +170,9 @@
     <Compile Include="Software House Parsley\ArcScn.cs" />
     <Compile Include="TechGian\ArcBIN.cs" />
     <Compile Include="Unity\ScriptDSM.cs" />
+    <Compile Include="Valkyria\CreateODNWidget.xaml.cs">
+      <DependentUpon>CreateODNWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Zyx\ImageXMG.cs" />
     <Compile Include="AudioAIFF.cs" />
     <Compile Include="Basil\ArcMIF.cs" />
@@ -1223,6 +1226,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Tamamo\WidgetPCK.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Valkyria\CreateODNWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
