@@ -1,8 +1,8 @@
-//! \file       ArcMPK.cs
-//! \date       2018 Oct 18
-//! \brief      MAGES engine archive implementation.
+//! \file       ArcPAK.cs
+//! \date       2023 Sep 18
+//! \brief      RED-ZONE resource archive.
 //
-// Copyright (C) 2018 by morkt
+// Copyright (C) 2023 by morkt
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -26,35 +26,41 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
-namespace GameRes.Formats.NitroPlus
+// [010706][RED-ZONE] Kenkyuu Nisshi
+
+namespace GameRes.Formats.RedZone
 {
     [Export(typeof(ArchiveFormat))]
-    public class MpkOpener : ArchiveFormat
+    public class PakOpener : ArchiveFormat
     {
-        public override string         Tag { get { return "MPK/MAGES"; } }
-        public override string Description { get { return "MAGES engine resource archive"; } }
-        public override uint     Signature { get { return 0x4B504D; } } // 'MPK'
-        public override bool  IsHierarchic { get { return false; } }
-        public override bool      CanWrite { get { return false; } }
+        public override string         Tag => "PAK/REDZONE";
+        public override string Description => "RED-ZONE resource archive";
+        public override uint     Signature => 0;
+        public override bool  IsHierarchic => false;
+        public override bool      CanWrite => false;
 
         public override ArcFile TryOpen (ArcView file)
         {
-            int count = file.View.ReadInt32 (8);
+            int count = file.View.ReadInt32 (0);
             if (!IsSaneCount (count))
                 return null;
-            uint index_offset = 0x48;
+
+            uint index_offset = 4;
+            const uint index_entry_size = 0x54;
+            long min_offset = index_offset + count * index_entry_size;
+            if (min_offset >= file.MaxOffset)
+                return null;
             var dir = new List<Entry> (count);
             for (int i = 0; i < count; ++i)
             {
-                var name = file.View.ReadString (index_offset+0x18, 0xE0);
-                var entry = Create<PackedEntry> (name);
-                entry.Offset = file.View.ReadInt64 (index_offset);
-                entry.Size = file.View.ReadUInt32 (index_offset+8);
-                entry.UnpackedSize = file.View.ReadUInt32 (index_offset+0x10);
-                if (!entry.CheckPlacement (file.MaxOffset))
+                var name = file.View.ReadString (index_offset, 0x44);
+                var entry = Create<Entry> (name);
+                entry.Offset = file.View.ReadUInt32 (index_offset+0x44);
+                entry.Size   = file.View.ReadUInt32 (index_offset+0x48);
+                if (entry.Offset < min_offset || !entry.CheckPlacement (file.MaxOffset))
                     return null;
                 dir.Add (entry);
-                index_offset += 0x100;
+                index_offset += index_entry_size;
             }
             return new ArcFile (file, this, dir);
         }

@@ -123,8 +123,17 @@
     <Compile Include="AdvSys\ImageGWD.cs" />
     <Compile Include="Ail\ArcLNK2.cs" />
     <Compile Include="AIRNovel\ArcAIR.cs" />
+    <Compile Include="Artemis\ImageNekoPNG.cs" />
+    <Compile Include="CsWare\AudioWAV.cs" />
+    <Compile Include="CsWare\ImageGDT.cs" />
+    <Compile Include="FC01\ArcBDT.cs" />
+    <Compile Include="FC01\ArcSCXA.cs" />
+    <Compile Include="FC01\BdtTables.cs" />
     <Compile Include="GScripter\ArcDATA.cs" />
     <Compile Include="Ism\ImagePNG.cs" />
+    <Compile Include="Kid\ArcDATRAW.cs" />
+    <Compile Include="Kid\ImageLBG.cs" />
+    <Compile Include="Kid\ImageSPC.cs" />
     <Compile Include="Kogado\ArcARC.cs" />
     <Compile Include="Ice\ImageIBM.cs" />
     <Compile Include="Ice\ScriptISD.cs" />
@@ -164,15 +173,28 @@
     <Compile Include="Macromedia\AudioSND.cs" />
     <Compile Include="Macromedia\DirectorFile.cs" />
     <Compile Include="Macromedia\Palettes.cs" />
+    <Compile Include="MAGES\ArcARC20.cs" />
+    <Compile Include="MAGES\ArcFARC.cs" />
+    <Compile Include="MAGES\ArcGTF.cs" />
+    <Compile Include="MAGES\ArcLoveOnce.cs" />
+    <Compile Include="MAGES\ImageBIN.cs" />
     <Compile Include="Mugi\ArcBIN.cs" />
+    <Compile Include="NipponIchi\ArcCASN.cs" />
+    <Compile Include="NipponIchi\ArcPSFS.cs" />
+    <Compile Include="NipponIchi\ImageNMT.cs" />
     <Compile Include="NScripter\Script.cs" />
+    <Compile Include="Psp\ArcQPK.cs" />
     <Compile Include="ScrPlayer\ImageIMG.cs" />
+    <Compile Include="SingleFileArchive.cs" />
+    <Compile Include="Software House Parsley\ArcCG3.cs" />
     <Compile Include="Software House Parsley\ArcScn.cs" />
     <Compile Include="TechGian\ArcBIN.cs" />
     <Compile Include="Unity\ScriptDSM.cs" />
     <Compile Include="Valkyria\CreateODNWidget.xaml.cs">
       <DependentUpon>CreateODNWidget.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Xuse\ArcNT.cs" />
+    <Compile Include="Xuse\ArcWVB.cs" />
     <Compile Include="Zyx\ImageXMG.cs" />
     <Compile Include="AudioAIFF.cs" />
     <Compile Include="Basil\ArcMIF.cs" />
@@ -307,8 +329,8 @@
     <Compile Include="MyAdv\ArcPAC.cs" />
     <Compile Include="Nekopack\ArcNEKO2.cs" />
     <Compile Include="Nekopack\ArcNEKO3.cs" />
-    <Compile Include="NitroPlus\ArcLAY.cs" />
-    <Compile Include="NitroPlus\ArcMPK.cs" />
+    <Compile Include="MAGES\ArcLAY.cs" />
+    <Compile Include="MAGES\ArcMPK.cs" />
     <Compile Include="NitroPlus\ArcNPP.cs" />
     <Compile Include="Noesis\ArcIGA.cs" />
     <Compile Include="NonColor\ArcMinato.cs" />
@@ -758,7 +780,6 @@
     <Compile Include="AZSys\ArcAZSys.cs" />
     <Compile Include="Ethornell\ArcBGI.cs" />
     <Compile Include="Ffa\ArcBlackPackage.cs" />
-    <Compile Include="Macromedia\ArcCCT.cs" />
     <Compile Include="Cherry\ArcCherry.cs" />
     <Compile Include="Circus\ArcCircus.cs" />
     <Compile Include="ArcCommon.cs" />
