@@ -188,7 +188,9 @@ namespace GameRes.Compression
 			HuffmanEncoder.mm_bits = 0;
 			TreeNode[] tree = new TreeNode[512];
 			uint rootIndex = HuffmanEncoder.BuildTree(tree, orginal);
-			byte[] array = new byte[orginal.Length * 4];
+			int array_size = orginal.Length * 4;
+			if (array_size < 0x200) array_size = 0x200;
+			byte[] array = new byte[array_size];
 			int num = 0;
 			using (BinaryWriter binaryWriter = new BinaryWriter(new MemoryStream(array)))
 			{
