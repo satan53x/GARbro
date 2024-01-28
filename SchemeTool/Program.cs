@@ -44,6 +44,12 @@ namespace SchemeTool
                     string name = "Silverio Trinity -Beyond the Horizon-";
                     if (!scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Add(name, crypt);
                 }
+                {
+                    uint[] rot_key = { 0x3C787768, 0x466E2D69, 0x35726440, 0x612B6743 };
+                    var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x100, key, rot_key);
+                    string name = "Dies irae Interview with Kaziklu Bey [ENG]";
+                    if (!scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Add(name, crypt);
+                }
 
             }
 
