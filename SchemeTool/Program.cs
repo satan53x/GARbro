@@ -30,25 +30,29 @@ namespace SchemeTool
                     uint[] rot_key = { 0x70752D37, 0x4A526B58, 0x7841457A, 0x67416155 };
                     var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
                     string name = "Silverio Ragnarok";
-                    if (!scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Add(name, crypt);
+                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
+                    scheme.KnownSchemes.Add(name, crypt);
                 }
                 {
                     uint[] rot_key = { 0x62466D43, 0x2B347A65, 0x74456279, 0x6D467A6F };
                     var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
                     string name = "Silverio Vendetta -Verse of Orpheus-";
-                    if (!scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Add(name, crypt);
+                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
+                    scheme.KnownSchemes.Add(name, crypt);
                 }
                 {
                     uint[] rot_key = { 0x372D3668, 0x336B6234, 0x6635662B, 0x78723869 };
                     var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
                     string name = "Silverio Trinity -Beyond the Horizon-";
-                    if (!scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Add(name, crypt);
+                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
+                    scheme.KnownSchemes.Add(name, crypt);
                 }
                 {
                     uint[] rot_key = { 0x3C787768, 0x466E2D69, 0x35726440, 0x612B6743 };
                     var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
                     string name = "Dies irae Interview with Kaziklu Bey [ENG]";
-                    if (!scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Add(name, crypt);
+                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
+                    scheme.KnownSchemes.Add(name, crypt);
                 }
 
             }
