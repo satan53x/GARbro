@@ -479,7 +479,7 @@ NextEntry:
             using (var writer = new BinaryWriter (output, Encoding.ASCII, true))
             {
                 writer.Write (s_xp3_header);
-                if (2 == xp3_options.Version)
+                if (2 == xp3_options.Version || 3 == xp3_options.Version)
                 {
                     writer.Write ((long)0x17);
                     writer.Write ((int)1);
@@ -516,7 +516,7 @@ NextEntry:
                                        && !(scheme.StartupTjsNotEncrypted && VFS.IsPathEqualsToFileName (name, "startup.tjs"))
                     };
                     bool compress = compress_contents && ShouldCompressFile (entry);
-                    using (var file = File.Open (name, FileMode.Open, FileAccess.Read))
+                    using (var file = File.Open (name, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         if (!xp3entry.IsEncrypted || 0 == file.Length)
                             RawFileCopy (file, xp3entry, output, compress);
@@ -538,20 +538,46 @@ NextEntry:
                         callback (callback_count++, null, arcStrings.MsgWritingIndex);
 
                     long dir_pos = 0;
+                    if (3 == xp3_options.Version)
+                    {
+                        foreach (var entry in dir)
+                        {
+                            header.Write ((uint)0x6e666e68); // "hnfn"
+                            header.Write ((long)(4+2+entry.Name.Length*2));
+                            header.Write ((uint)entry.Hash);
+                            header.Write ((short)entry.Name.Length);
+                            foreach (char c in entry.Name)
+                                header.Write (c);
+                        }
+                        dir_pos = header.BaseStream.Position;
+                    }
                     foreach (var entry in dir)
                     {
+                        var entry_name = entry.Name;
+                        if (3 == xp3_options.Version)
+                        {
+                            using (var md5 = MD5.Create())
+                            {
+                                var text_bytes = Encoding.Unicode.GetBytes(entry.Name.ToLowerInvariant());
+                                var hash = md5.ComputeHash(text_bytes);
+                                var sb = new StringBuilder(32);
+                                for (int i = 0; i < hash.Length; ++i)
+                                    sb.AppendFormat("{0:x2}", hash[i]);
+                                entry_name = sb.ToString();
+                            }
+                        }
                         header.BaseStream.Position = dir_pos;
                         header.Write ((uint)0x656c6946); // "File"
                         long header_size_pos = header.BaseStream.Position;
                         header.Write ((long)0);
                         header.Write ((uint)0x6f666e69); // "info"
-                        header.Write ((long)(4+8+8+2 + entry.Name.Length*2));
+                        header.Write ((long)(4+8+8+2 + entry_name.Length*2));
                         header.Write ((uint)(use_encryption ? 0x80000000 : 0));
                         header.Write ((long)entry.UnpackedSize);
                         header.Write ((long)entry.Size);
 
-                        header.Write ((short)entry.Name.Length);
-                        foreach (char c in entry.Name)
+                        header.Write ((short)entry_name.Length);
+                        foreach (char c in entry_name)
                             header.Write (c);
 
                         header.Write ((uint)0x6d676573); // "segm"
