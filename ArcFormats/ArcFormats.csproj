@@ -182,6 +182,7 @@
     <Compile Include="NipponIchi\ArcCASN.cs" />
     <Compile Include="NipponIchi\ArcPSFS.cs" />
     <Compile Include="NipponIchi\ImageNMT.cs" />
+    <Compile Include="NScripter\ArcDAT.cs" />
     <Compile Include="NScripter\Script.cs" />
     <Compile Include="Psp\ArcQPK.cs" />
     <Compile Include="ScrPlayer\ImageIMG.cs" />

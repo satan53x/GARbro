@@ -14,6 +14,7 @@
             <ComboBoxItem Content="{x:Static s:arcStrings.ONSCompressionNone}"/>
             <ComboBoxItem Content="SPB"/>
             <ComboBoxItem Content="LZSS"/>
+            <ComboBoxItem Content="ZLIB"/>
 <!--not implemented
             <ComboBoxItem Content="NBZ" Tag="NBZ"/>-->
         </ComboBox>

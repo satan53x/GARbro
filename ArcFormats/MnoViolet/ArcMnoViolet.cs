@@ -45,7 +45,7 @@ namespace GameRes.Formats.MnoViolet
             Extensions = new string[] { "dat" };
         }
 
-        static readonly uint[] NameSizes = { 100, 68, 44 };
+        static readonly uint[] NameSizes = { 100, 68, 44, 24 };
         static readonly Lazy<ImageFormat> s_GraFormat = new Lazy<ImageFormat> (() => ImageFormat.FindByTag ("GRA"));
 
         public override ArcFile TryOpen (ArcView file)

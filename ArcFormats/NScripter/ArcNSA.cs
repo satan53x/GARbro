@@ -31,6 +31,7 @@ using System.Text;
 using GameRes.Formats.Strings;
 using GameRes.Utility;
 using ICSharpCode.SharpZipLib.BZip2;
+using GameRes.Compression;
 
 namespace GameRes.Formats.NScripter
 {
@@ -69,6 +70,7 @@ namespace GameRes.Formats.NScripter
         SPB     = 1,
         LZSS    = 2,
         NBZ     = 4,
+        ZLIB    = 8,
     }
 
     [Export(typeof(ArchiveFormat))]
@@ -192,6 +194,10 @@ namespace GameRes.Formats.NScripter
                 input.Position = 4;
                 return new BZip2InputStream (input);
             }
+            if (Compression.ZLIB == nsa_entry.CompressionType)
+            {
+                return ZLibCompressor.DeCompress(input);
+            }
             if (!(Compression.LZSS == nsa_entry.CompressionType ||
                   Compression.SPB  == nsa_entry.CompressionType))
                 return input;
@@ -205,7 +211,7 @@ namespace GameRes.Formats.NScripter
             }
         }
 
-        private string QueryPassword ()
+        protected string QueryPassword ()
         {
             var options = Query<NsaOptions> (arcStrings.ArcEncryptedNotice);
             return options.Password;
@@ -290,6 +296,12 @@ namespace GameRes.Formats.NScripter
                     {
                         var packer = new Packer (input, output);
                         entry.Size = packer.EncodeLZSS();
+                    }
+                    else if (Compression.ZLIB == entry.CompressionType)
+                    {
+                        var dest = ZLibCompressor.Compress(input);
+                        entry.Size = (uint)dest.Length;
+                        dest.CopyTo(output);
                     }
                     else
                     {

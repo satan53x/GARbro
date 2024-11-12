@@ -27,6 +27,7 @@ namespace GameRes.Formats.GUI
             case NScripter.Compression.SPB:   return "SPB";
             case NScripter.Compression.LZSS:  return "LZSS";
             case NScripter.Compression.NBZ:   return "NBZ";
+            case NScripter.Compression.ZLIB: return "ZLIB";
             default: return arcStrings.ONSCompressionNone;
             }
         }
@@ -42,6 +43,8 @@ namespace GameRes.Formats.GUI
                     return NScripter.Compression.LZSS;
                 else if ("NBZ" == s)
                     return NScripter.Compression.NBZ;
+                else if ("ZLIB" == s)
+                    return NScripter.Compression.ZLIB;
             }
             return NScripter.Compression.None;
         }
