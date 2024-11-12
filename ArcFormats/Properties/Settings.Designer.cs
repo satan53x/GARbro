@@ -847,6 +847,9 @@ namespace GameRes.Formats.Properties {
             }
             set {
                 this["ODNVersion"] = value;
+            }
+        }
+
         [global::System.Configuration.DefaultSettingValueAttribute("DXARC")]
         public string DXAPassword {
             get {
