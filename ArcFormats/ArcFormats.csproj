@@ -14,6 +14,8 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -102,6 +104,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="ZstdNet, Version=1.4.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZstdNet.1.4.5\lib\net45\ZstdNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abel\ArcARC.cs" />
@@ -126,12 +131,18 @@
     <Compile Include="Artemis\ImageNekoPNG.cs" />
     <Compile Include="CsWare\AudioWAV.cs" />
     <Compile Include="CsWare\ImageGDT.cs" />
+    <Compile Include="DxLib\HuffmanDecoder.cs" />
+    <Compile Include="DxLib\WidgetDXA.xaml.cs">
+      <DependentUpon>WidgetDXA.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FC01\ArcBDT.cs" />
     <Compile Include="FC01\ArcSCXA.cs" />
     <Compile Include="FC01\BdtTables.cs" />
     <Compile Include="GScripter\ArcDATA.cs" />
     <Compile Include="Ism\ImagePNG.cs" />
     <Compile Include="Kid\ArcDATRAW.cs" />
+    <Compile Include="Kid\ImageBIP.cs" />
+    <Compile Include="Kid\ImageBIParc.cs" />
     <Compile Include="Kid\ImageLBG.cs" />
     <Compile Include="Kid\ImageSPC.cs" />
     <Compile Include="Kogado\ArcARC.cs" />
@@ -175,6 +186,7 @@
     <Compile Include="Macromedia\Palettes.cs" />
     <Compile Include="MAGES\ArcARC20.cs" />
     <Compile Include="MAGES\ArcFARC.cs" />
+    <Compile Include="MAGES\ArcGPDA.cs" />
     <Compile Include="MAGES\ArcGTF.cs" />
     <Compile Include="MAGES\ArcLoveOnce.cs" />
     <Compile Include="MAGES\ImageBIN.cs" />
@@ -1151,6 +1163,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="DxLib\WidgetDXA.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DxLib\WidgetSCR.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1334,6 +1350,7 @@ exit 0</PreBuildEvent>
     <PostBuildEvent>if not exist "$(TargetDir)\GameData" mkdir "$(TargetDir)\GameData"
 xcopy "$(ProjectDir)\Resources\Formats.dat" "$(TargetDir)\GameData\" /D /Y &gt;NUL</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\ZstdNet.1.4.5\build\ZstdNet.targets" Condition="Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

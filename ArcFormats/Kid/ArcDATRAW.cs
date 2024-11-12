@@ -38,6 +38,8 @@ namespace GameRes.Formats.Kid
                 entry.Size = size;
                 dir.Add(entry);
             }
+            if (dir.Count == 0)
+                return null;
             return new ArcFile(file, this, dir);
         }
 

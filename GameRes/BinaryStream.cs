@@ -170,6 +170,27 @@ namespace GameRes
             return bin;
         }
 
+        internal int FindEoS (int start, int length, Encoding enc)
+        {
+            int eos_pos = -1;
+            if (enc.IsUtf16())
+            {
+                for (int i = start+1; i < start+length; i += 2)
+                {
+                    if (m_buffer[i-1] == 0 && m_buffer[i] == 0)
+                    {
+                        eos_pos = i - 1;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                eos_pos = Array.IndexOf<byte> (m_buffer, 0, start, length);
+            }
+            return eos_pos;
+        }
+
         uint ReadSignature ()
         {
             if (m_header_size >= 4)
@@ -307,10 +328,7 @@ namespace GameRes
         public string ReadCString (int length, Encoding enc)
         {
             length = FillBuffer (length);
-            int i;
-            for (i = 0; i < length; ++i)
-                if (0 == m_buffer[m_buffer_pos+i])
-                    break;
+            int i = FindEoS(m_buffer_pos, length, enc) - m_buffer_pos;
             string s = enc.GetString (m_buffer, m_buffer_pos, i);
             m_buffer_pos += length;
             return s;

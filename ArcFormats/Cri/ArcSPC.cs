@@ -42,12 +42,12 @@ namespace GameRes.Formats.Cri
 
         public SpcOpener ()
         {
-            Extensions = new string[] { "spc" };
+            Extensions = new string[] { "spc", "bip" };
         }
 
         public override ArcFile TryOpen (ArcView file)
         {
-            if (!file.Name.HasExtension (".spc"))
+            if (!file.Name.HasExtension (".spc") && !file.Name.HasExtension(".bip"))
                 return null;
             uint unpacked_size = file.View.ReadUInt32 (0);
             if (unpacked_size <= 0x20 || unpacked_size > 0x5000000)

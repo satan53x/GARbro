@@ -42,6 +42,9 @@ namespace GameRes.Formats.NeXAS
         Huffman,
         Deflate,
         DeflateOrNone,
+        None2,
+        Zstd,
+        ZstdOrNone,
     }
 
     public class PacArchive : ArcFile
@@ -67,13 +70,16 @@ namespace GameRes.Formats.NeXAS
         public PacOpener ()
         {
             Signatures = new uint[] { 0x00434150, 0 };
+            Settings = new[] { PacEncoding };
         }
+
+        EncodingSetting PacEncoding = new EncodingSetting ("NexasEncodingCP", "DefaultEncoding");
 
         public override ArcFile TryOpen (ArcView file)
         {
             if (!file.View.AsciiEqual (0, "PAC") || 'K' == file.View.ReadByte (3))
                 return null;
-            var reader = new IndexReader (file);
+            var reader = new IndexReader (file, PacEncoding.Get<Encoding>());
             var dir = reader.Read();
             if (null == dir)
                 return null;
@@ -88,16 +94,18 @@ namespace GameRes.Formats.NeXAS
             ArcView     m_file;
             int         m_count;
             int         m_pack_type;
+            Encoding    m_encoding;
 
             const int MaxNameLength = 0x40;
 
             public Compression PackType { get { return (Compression)m_pack_type; } }
 
-            public IndexReader (ArcView file)
+            public IndexReader (ArcView file, Encoding enc)
             {
                 m_file = file;
                 m_count = file.View.ReadInt32 (4);
                 m_pack_type = file.View.ReadInt32 (8);
+                m_encoding = enc;
             }
 
             List<Entry> m_dir;
@@ -151,7 +159,7 @@ namespace GameRes.Formats.NeXAS
                 m_dir.Clear();
                 for (int i = 0; i < m_count; ++i)
                 {
-                    var name = index.ReadCString (name_length);
+                    var name = index.ReadCString (name_length, m_encoding);
                     if (string.IsNullOrWhiteSpace (name))
                         return false;
                     var entry = FormatCatalog.Instance.Create<PackedEntry> (name);
@@ -160,7 +168,23 @@ namespace GameRes.Formats.NeXAS
                     entry.Size          = index.ReadUInt32();
                     if (!entry.CheckPlacement (m_file.MaxOffset))
                         return false;
-                    entry.IsPacked = m_pack_type != 0 && (m_pack_type != 4 || entry.Size != entry.UnpackedSize);
+                    switch (m_pack_type)
+                    {
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 6:
+                        {
+                            entry.IsPacked = true;
+                            break;
+                        }
+                        case 4:
+                        case 7:
+                        {
+                            entry.IsPacked = entry.Size != entry.UnpackedSize;
+                            break;
+                        }
+                    }
                     m_dir.Add (entry);
                 }
                 return true;
@@ -188,8 +212,16 @@ namespace GameRes.Formats.NeXAS
                     return new BinMemoryStream (unpacked, 0, (int)pent.UnpackedSize, entry.Name);
                 }
             case Compression.Deflate:
-            default:
+            case Compression.DeflateOrNone:
                 return new ZLibStream (input, CompressionMode.Decompress);
+            case Compression.Zstd:
+            case Compression.ZstdOrNone:
+            {
+                var unpacked = ZstdDecompress (input, pent.UnpackedSize);
+                return new BinMemoryStream (unpacked, entry.Name);
+            }
+            default:
+                return input;
             }
         }
 
@@ -198,6 +230,16 @@ namespace GameRes.Formats.NeXAS
             var dst = new byte[unpacked_size];
             var decoder = new HuffmanDecoder (packed, dst);
             return decoder.Unpack();
+        }
+
+        static private byte[] ZstdDecompress (Stream s, uint unpackedSize)
+        {
+            using (var ds = new ZstdNet.DecompressionStream (s))
+            {
+                var dst = new byte[unpackedSize];
+                ds.Read (dst, 0, dst.Length);
+                return dst;
+            }
         }
     }
 }

@@ -41,7 +41,7 @@ namespace GameRes.Formats.Valkyria
 
     internal interface IMg2Scheme
     {
-        Mg2EncryptedStream CreateStream (Stream main, int offset, int length);
+        Mg2EncryptedStream CreateStream (Stream main, int offset, int length, int key);
         ImageData CreateImage (BitmapSource bitmap, ImageMetaData info);
     }
 
@@ -52,17 +52,17 @@ namespace GameRes.Formats.Valkyria
         public override string Description { get { return "Valkyria image format"; } }
         public override uint     Signature { get { return 0x4F43494D; } } // 'MICO'
 
-        static readonly IMg2Scheme[] KnownSchemes = { new Mg2SchemeV1(), new Mg2SchemeV2() };
+        static readonly IMg2Scheme[] KnownSchemes = { new Mg2SchemeV1(), new Mg2SchemeV2(), new Mg2SchemeV3() };
 
         public override ImageMetaData ReadMetaData (IBinaryStream file)
         {
             var header = file.ReadHeader (0x10);
-            if (!header.AsciiEqual (4, "CG01"))
+            if (!header.AsciiEqual (4, "CG01") && !header.AsciiEqual (4, "CG02"))
                 return null;
             int length = header.ToInt32 (8);
             foreach (var scheme in KnownSchemes)
             {
-                using (var input = scheme.CreateStream (file.AsStream, 0x10, length))
+                using (var input = scheme.CreateStream (file.AsStream, 0x10, length, length))
                 using (var img = new BinaryStream (input, file.Name))
                 {
                     ImageFormat format;
@@ -102,7 +102,7 @@ namespace GameRes.Formats.Valkyria
         BitmapSource ReadBitmapSource (Stream file, Mg2MetaData meta)
         {
             BitmapSource frame;
-            using (var input = meta.Scheme.CreateStream (file, 0x10, meta.ImageLength))
+            using (var input = meta.Scheme.CreateStream (file, 0x10, meta.ImageLength, meta.ImageLength))
             using (var img = new BinaryStream (input, meta.FileName))
             {
                 var image = meta.Format.Read (img, meta);
@@ -116,7 +116,7 @@ namespace GameRes.Formats.Valkyria
             var pixels = new byte[stride * (int)meta.Height];
             frame.CopyPixels (pixels, stride, 0);
 
-            using (var input = meta.Scheme.CreateStream (file, 0x10+meta.ImageLength, meta.AlphaLength))
+            using (var input = meta.Scheme.CreateStream (file, 0x10+meta.ImageLength, meta.AlphaLength, meta.ImageLength))
             {
                 var decoder = BitmapDecoder.Create (input, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
                 BitmapSource alpha_frame = decoder.Frames[0];
@@ -148,32 +148,53 @@ namespace GameRes.Formats.Valkyria
 
     internal class Mg2EncryptedStream : StreamRegion
     {
+        readonly byte   m_version;
         readonly int    m_threshold;
-        readonly byte   m_key;
+        readonly byte   m_key0;
+        readonly byte   m_key1;
 
-        protected Mg2EncryptedStream (Stream main, int offset, int length, int threshold, byte key)
+        protected Mg2EncryptedStream (Stream main, int offset, int length, byte version, int threshold, byte key0, byte key1)
             : base (main, offset, length, true)
         {
+            m_version = version;
             m_threshold = threshold;
-            m_key = key;
+            m_key0 = key0;
+            m_key1 = key1;
         }
 
         public static Mg2EncryptedStream CreateV1 (Stream main, int offset, int length)
         {
-            return new Mg2EncryptedStream (main, offset, length, length / 5, 0);
+            return new Mg2EncryptedStream(main, offset, length, 1, length / 5, 0, 0);
         }
 
         public static Mg2EncryptedStream CreateV2 (Stream main, int offset, int length)
         {
-            return new Mg2EncryptedStream (main, offset, length, Math.Min (25, length), (byte)length);
+            return new Mg2EncryptedStream( main, offset, length, 2, Math.Min(25, length), (byte)length, 0);
+        }
+
+        public static Mg2EncryptedStream CreateV3 (Stream main, int offset, int length, int key)
+        {
+            return new Mg2EncryptedStream(main, offset, length, 3, 0, (byte)(key >> 1), (byte)((key & 1) + (key >> 3)));
         }
 
         public override int Read (byte[] buffer, int offset, int count)
         {
-            int pos = (int)Position;
-            int read = base.Read (buffer, offset, count);
-            for (int i = 0; i < read && pos < m_threshold; ++i)
-                buffer[offset+i] ^= (byte)(m_key + pos++);
+            long pos = Position;
+            int read = base.Read(buffer, offset, count);
+
+            if (m_version == 3)
+            {
+                for (int i = 0; i < read; ++i)
+                {
+                    buffer[offset+i] ^= (byte)((pos >> 4) ^ (pos + m_key0) ^ m_key1);
+                    pos++;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < read && pos < m_threshold; ++i)
+                    buffer[offset+i] ^= (byte)(m_key0 + pos++);
+            }
             return read;
         }
 
@@ -181,15 +202,24 @@ namespace GameRes.Formats.Valkyria
         {
             long pos = Position;
             int b = base.ReadByte();
-            if (b != -1 && pos < m_threshold)
-                b ^= (byte)(m_key + pos);
+
+            if (m_version == 3)
+            {
+                b ^= (byte)((pos >> 4) ^ (pos + m_key0) ^ m_key1);
+            }
+            else
+            {
+                if (b != -1 && pos < m_threshold)
+                    b ^= (byte)(m_key0 + pos);
+            }
+
             return b;
         }
     }
 
     internal class Mg2SchemeV1 : IMg2Scheme
     {
-        public Mg2EncryptedStream CreateStream (Stream main, int offset, int length)
+        public Mg2EncryptedStream CreateStream (Stream main, int offset, int length, int key)
         {
             return Mg2EncryptedStream.CreateV1 (main, offset, length);
         }
@@ -203,7 +233,7 @@ namespace GameRes.Formats.Valkyria
 
     internal class Mg2SchemeV2 : IMg2Scheme
     {
-        public Mg2EncryptedStream CreateStream (Stream main, int offset, int length)
+        public Mg2EncryptedStream CreateStream (Stream main, int offset, int length, int key)
         {
             return Mg2EncryptedStream.CreateV2 (main, offset, length);
         }
@@ -213,6 +243,21 @@ namespace GameRes.Formats.Valkyria
             frame = new TransformedBitmap (frame, new ScaleTransform { ScaleY = -1 });
             frame.Freeze();
             return new ImageData (frame, info);
+        }
+    }
+
+    internal class Mg2SchemeV3 : IMg2Scheme
+    {
+        public Mg2EncryptedStream CreateStream (Stream main, int offset, int length, int key)
+        {
+            return Mg2EncryptedStream.CreateV3 (main, offset, length, key);
+        }
+
+        public ImageData CreateImage (BitmapSource frame, ImageMetaData info)
+        {
+            frame = new TransformedBitmap(frame, new ScaleTransform { ScaleY = -1 });
+            frame.Freeze();
+            return new ImageData(frame, info);
         }
     }
 }
