@@ -204,6 +204,10 @@
     <Compile Include="Software House Parsley\ArcScn.cs" />
     <Compile Include="TechGian\ArcBIN.cs" />
     <Compile Include="Unity\ScriptDSM.cs" />
+    <Compile Include="VnMaker\ArcZIP.cs" />
+    <Compile Include="VnMaker\AudioMP3.cs" />
+    <Compile Include="VnMaker\AudioOGG.cs" />
+    <Compile Include="VnMaker\ImagePNG.cs" />
     <Compile Include="Xuse\ArcNT.cs" />
     <Compile Include="Xuse\ArcWVB.cs" />
     <Compile Include="Zyx\ImageXMG.cs" />
