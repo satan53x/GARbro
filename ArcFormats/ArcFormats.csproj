@@ -146,6 +146,7 @@
     <Compile Include="Kid\ArcDATRAW.cs" />
     <Compile Include="Kid\ImageBIP.cs" />
     <Compile Include="Kid\ImageBIParc.cs" />
+    <Compile Include="Kid\ImageKLZ.cs" />
     <Compile Include="Kid\ImageLBG.cs" />
     <Compile Include="Kid\ImageSPC.cs" />
     <Compile Include="Kogado\ArcARC.cs" />
