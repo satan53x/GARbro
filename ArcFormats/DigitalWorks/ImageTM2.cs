@@ -69,6 +69,7 @@ namespace GameRes.Formats.DigitalWorks
             case 1: bpp = 16; break;
             case 2: bpp = 24; break;
             case 3: bpp = 32; break;
+            case 4: bpp = 4; break; //16color
             case 5: bpp = 8; break;
             default: return null;
             }
@@ -118,25 +119,26 @@ namespace GameRes.Formats.DigitalWorks
             m_info = info;
             switch (info.BPP)
             {
-            case 8:  Format = PixelFormats.Indexed8; break;
-            case 16: Format = PixelFormats.Bgr555; break;
-            case 24: Format = PixelFormats.Bgr24;  break;
-            case 32: Format = PixelFormats.Bgra32; break;
+                case 4:  Format = PixelFormats.Indexed4; break;
+                case 8:  Format = PixelFormats.Indexed8; break;
+                case 16: Format = PixelFormats.Bgr555; break;
+                case 24: Format = PixelFormats.Bgr24;  break;
+                case 32: Format = PixelFormats.Bgra32; break;
             }
         }
 
         public byte[] Unpack ()
         {
             m_input.Position = 0x10 + m_info.HeaderSize;
-            int pixel_size = m_info.BPP / 8;
-            int image_size = (int)m_info.Width * (int)m_info.Height * pixel_size;
+            double pixel_size = (double)m_info.BPP / 8;
+            int image_size = (int)((int)m_info.Width * (int)m_info.Height * pixel_size);
             var output = m_input.ReadBytes (image_size);
             if (pixel_size <= 8 && m_info.Colors > 0)
                 Palette = ReadPalette (m_info.Colors, m_info.Alpha);
 
             if (pixel_size == 3 || pixel_size == 4 && m_info.Alpha == 8)
             {
-                for (int i = 0; i < image_size; i += pixel_size)
+                for (int i = 0; i < image_size; i += (int)pixel_size)
                 {
                     byte r = output[i];
                     output[i] = output[i+2];
@@ -174,6 +176,11 @@ namespace GameRes.Formats.DigitalWorks
             var source = ImageFormat.ReadColorMap (m_input.AsStream,
                 color_num, X_A == 7 ? PaletteFormat.RgbA7 : X_A == 0 ? PaletteFormat.RgbX : PaletteFormat.RgbA);
             var color_map = new Color[color_num];
+
+            if (color_num == 16){
+                Array.Copy(source, 0, color_map, 0, 16);
+                return new BitmapPalette(color_map);
+            }
 
             int parts = color_num / 32;
             const int blocks = 2;

@@ -71,8 +71,8 @@ namespace GameRes
         BgrX    = 6,
         RgbA    = 9,
         BgrA    = 10,
-        RgbA7 = 55,
-        BgrA7 = 66,
+        RgbA7   = 55,
+        BgrA7   = 66,
     }
 
     public class ImageData
@@ -126,7 +126,8 @@ namespace GameRes
         public static ImageData Create (ImageMetaData info, PixelFormat format, BitmapPalette palette,
                                         Array pixel_data)
         {
-            return Create (info, format, palette, pixel_data, (int)info.Width*((format.BitsPerPixel+7)/8));
+            return Create (info, format, palette, pixel_data,
+                format.BitsPerPixel == 4 ? (int)info.Width*format.BitsPerPixel/8 : (int)info.Width*((format.BitsPerPixel+7)/8));
         }
 
         public static ImageData CreateFlipped (ImageMetaData info, PixelFormat format, BitmapPalette palette,
