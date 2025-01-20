@@ -16,6 +16,7 @@ namespace GameRes.Formats.Kid
         public KlzFormat()
         {
             Extensions = new string[] { "klz" };
+            Settings = null;
         }
 
         public override ImageMetaData ReadMetaData(IBinaryStream stream)
