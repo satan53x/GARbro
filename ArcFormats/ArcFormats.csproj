@@ -131,7 +131,9 @@
     <Compile Include="Artemis\ImageNekoPNG.cs" />
     <Compile Include="CsWare\AudioWAV.cs" />
     <Compile Include="CsWare\ImageGDT.cs" />
+    <Compile Include="DigitalWorks\ArcPACsingle.cs" />
     <Compile Include="DigitalWorks\ArcPACPS2.cs" />
+    <Compile Include="DigitalWorks\ImageTM2arc.cs" />
     <Compile Include="DxLib\HuffmanDecoder.cs" />
     <Compile Include="DxLib\WidgetDXA.xaml.cs">
       <DependentUpon>WidgetDXA.xaml</DependentUpon>
@@ -142,8 +144,10 @@
     <Compile Include="GScripter\ArcDATA.cs" />
     <Compile Include="Ism\ImagePNG.cs" />
     <Compile Include="Kid\ArcDATRAW.cs" />
+    <Compile Include="Kid\ArcKLZ.cs" />
     <Compile Include="Kid\ImageBIP.cs" />
     <Compile Include="Kid\ImageBIParc.cs" />
+    <Compile Include="Kid\ImageKLZ.cs" />
     <Compile Include="Kid\ImageLBG.cs" />
     <Compile Include="Kid\ImageSPC.cs" />
     <Compile Include="Kogado\ArcARC.cs" />

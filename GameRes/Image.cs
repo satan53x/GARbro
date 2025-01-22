@@ -71,6 +71,8 @@ namespace GameRes
         BgrX    = 6,
         RgbA    = 9,
         BgrA    = 10,
+        RgbA7   = 55,
+        BgrA7   = 66,
     }
 
     public class ImageData
@@ -124,7 +126,8 @@ namespace GameRes
         public static ImageData Create (ImageMetaData info, PixelFormat format, BitmapPalette palette,
                                         Array pixel_data)
         {
-            return Create (info, format, palette, pixel_data, (int)info.Width*((format.BitsPerPixel+7)/8));
+            return Create (info, format, palette, pixel_data,
+                format.BitsPerPixel == 4 ? (int)info.Width*format.BitsPerPixel/8 : (int)info.Width*((format.BitsPerPixel+7)/8));
         }
 
         public static ImageData CreateFlipped (ImageMetaData info, PixelFormat format, BitmapPalette palette,
@@ -215,12 +218,16 @@ namespace GameRes
             Func<int, Color> get_color;
             if (PaletteFormat.Bgr == format || PaletteFormat.BgrX == format)
                 get_color = x => Color.FromRgb (palette_data[x+2], palette_data[x+1], palette_data[x]);
+            else if (PaletteFormat.BgrA7 == format)
+                get_color = x => Color.FromArgb(palette_data[x+3] >= byte.MaxValue / 2 ? byte.MaxValue : (byte)(palette_data[x+3] << 1), palette_data[x+2], palette_data[x+1], palette_data[x]);
             else if (PaletteFormat.BgrA == format)
                 get_color = x => Color.FromArgb (palette_data[x+3], palette_data[x+2], palette_data[x+1], palette_data[x]);
             else if (PaletteFormat.RgbA == format)
                 get_color = x => Color.FromArgb (palette_data[x+3], palette_data[x], palette_data[x+1], palette_data[x+2]);
+            else if (PaletteFormat.RgbA7 == format)
+                get_color = x => Color.FromArgb (palette_data[x+3] >= byte.MaxValue / 2 ? byte.MaxValue : (byte)(palette_data[x+3] << 1), palette_data[x], palette_data[x+1], palette_data[x+2]);
             else
-                get_color = x => Color.FromRgb (palette_data[x],   palette_data[x+1], palette_data[x+2]);
+                get_color = x => Color.FromRgb (palette_data[x], palette_data[x+1], palette_data[x+2]);
 
             for (int i = 0; i < colors; ++i)
             {
