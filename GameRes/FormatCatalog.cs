@@ -77,6 +77,7 @@ namespace GameRes
         public string     DataDirectory { get { return m_gamedata_dir.Value; } }
 
         public Exception LastError { get; set; }
+        public SchemeDataBase FormatsDataBase { get; set; }
 
         public event ParametersRequestEventHandler  ParametersRequest;
 
@@ -337,6 +338,7 @@ namespace GameRes
             {
                 var bin = new BinaryFormatter();
                 var db = (SchemeDataBase)bin.Deserialize (zs);
+                FormatsDataBase = db;
 
                 foreach (var format in Formats)
                 {

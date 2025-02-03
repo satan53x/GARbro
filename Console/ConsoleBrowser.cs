@@ -11,6 +11,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using GameRes;
+using Newtonsoft.Json;
 
 namespace GARbro
 {
@@ -19,6 +20,7 @@ namespace GARbro
         private string      m_arc_name;
         private ImageFormat m_image_format;
         private bool        m_extract_all;
+        private bool        m_output_data = false;
 
         void ListFormats ()
         {
@@ -27,6 +29,35 @@ namespace GARbro
             {
                 Console.WriteLine ("{0,-4} {1}", impl.Tag, impl.Description);
             }
+        }
+
+        void OutputData()
+        {
+            string dir = "GameData";
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            Console.WriteLine("Output GameData to json:");
+            // FormatsDataBase 
+            string content = JsonConvert.SerializeObject(FormatCatalog.Instance.FormatsDataBase, Formatting.Indented);
+            string filePath = Path.Combine(dir, "FormatsDataBase.json");
+            File.WriteAllText(filePath, content);
+            Console.WriteLine(filePath);
+            // Formats
+            List<IResource> lst = new List<IResource>();
+            int i = 0;
+            foreach (var format in FormatCatalog.Instance.Formats)
+            {
+                lst.Add(format);
+                i++;
+            }
+            content = JsonConvert.SerializeObject(lst, Formatting.Indented);
+            filePath = Path.Combine(dir, "Formats.json");
+            File.WriteAllText(filePath, content);
+            Console.WriteLine(filePath);
+            //
+            Console.WriteLine("Done.");
         }
 
         void ExtractAll (ArcFile arc)
@@ -114,6 +145,11 @@ namespace GARbro
                         return;
                     }
                 }
+                else if (args[argn].Equals("-o"))
+                {
+                    m_output_data = true;
+                    break;
+                }
                 else
                 {
                     break;
@@ -125,6 +161,11 @@ namespace GARbro
                 return;
             }
             DeserializeGameData();
+            if (m_output_data)
+            {
+                OutputData();
+                return;
+            }
             foreach (var file in VFS.GetFiles (args[argn]))
             {
                 m_arc_name = file.Name;
@@ -177,6 +218,7 @@ namespace GARbro
             Console.WriteLine ("    -l          list recognized archive formats");
             Console.WriteLine ("    -x          extract all files");
             Console.WriteLine ("    -c FORMAT   convert images to specified format");
+            Console.WriteLine ("    -o          output GameData to json");
             Console.WriteLine ("Without options displays contents of specified archive.");
         }
 
