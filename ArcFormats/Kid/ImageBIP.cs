@@ -110,10 +110,20 @@ namespace GameRes.Formats.Kid
             }
 
             // uint dx = dy * 32;
-            if (bpp == 8) //PSP format
+            if (bpp == 8) //256C format
             {
-                dy = 16;
                 sliced = true;
+                oversize = (double)width * height / (file.Length - fstart);
+                if (oversize > 0.85 || width == 480 || height == 360) // PSP format force 16
+                {
+                    dy = 16;
+                    // standard: 0.8789 large: 0.7418
+                }
+                else
+                {
+                    dy = 32;
+                    // standard: 0.7817 large: 0.8333
+                }
             }
 
             return new BipImageMetaData
@@ -139,46 +149,17 @@ namespace GameRes.Formats.Kid
             byte[] pixels = new byte[bipheader.iWidth * bipheader.iHeight * m_bpp];
             uint dy = bipheader.BlockSize;
             uint dx = dy * 32;
-            if (bipheader.Sliced && m_bpp == 4)
+
+            if (bipheader.Sliced && m_bpp == 1 && dy == 16)
             {
-                long dwidth = ((bipheader.iWidth + (dy - 2) - 1) / (dy - 2)) * dy;
-                long dheight = ((bipheader.iHeight + (dy - 2) - 1) / (dy - 2)) * dy;
+                long dwidth = ((bipheader.iWidth + (dy * 2 - 2) - 1) / (dy * 2 - 2)) * dy * 2;
+                long dheight = ((bipheader.iHeight + (dy * 2 - 2) - 1) / (dy * 2 - 2)) * dy * 2;
                 long focus_H = (dwidth * dheight + dx - 1) / dx;
                 long focus_T = (focus_H + dy - 1) / dy;
-                
-                for (int t = 0; t < focus_T; t++)
+                if (focus_T % 2 == 1)
                 {
-                    for(int y = 0; y < dy; y++)
-                    {
-                        for (int x = 0; x < dx; x++)
-                        {
-                            var pixel = file.ReadBytes(m_bpp); //RGBA with wrong A
-                            long i2x = x + t * dx;
-                            long i3t = i2x / dwidth;
-                            long i3x = i2x - i3t * dwidth;
-                            long i3y = i3t * (dy - 2) + y;
-                            long i4x = i3x - i3x / dy * dy + i3x / dy * (dy - 2);
-                            if (i3x >= dwidth || i4x >= bipheader.iWidth || i3y >= bipheader.iHeight)
-                                continue;
-                            long target = (i4x + i3y * bipheader.iWidth) * m_bpp;
-                            //BGRA
-                            pixels[target] = pixel[2];
-                            pixels[target + 1] = pixel[1];
-                            pixels[target + 2] = pixel[0];
-                            if (pixel[3] >= byte.MaxValue / 2)
-                                pixels[target + 3] = byte.MaxValue;
-                            else
-                                pixels[target + 3] = (byte)(pixel[3] << 1);
-                        }
-                    }
+                    focus_T++;
                 }
-            }
-            else if(bipheader.Sliced && m_bpp == 1)
-            {
-                long dwidth = ((bipheader.iWidth + (dy - 1) - 1) / (dy - 1)) * dy;
-                long dheight = ((bipheader.iHeight + (dy - 1) - 1) / (dy - 1)) * dy;
-                long focus_H = (dwidth * dheight + dx - 1) / dx;
-                long focus_T = (focus_H + dy - 1) / dy;
 
                 for (int t = 0; t < focus_T; t++)
                 {
@@ -198,6 +179,47 @@ namespace GameRes.Formats.Kid
                             long target = i4x + i3y * bipheader.iWidth;
                             
                             pixels[target] = pixel;
+                        }
+                    }
+                }
+            }
+            else if (bipheader.Sliced/* && m_bpp == 4 or bpp=1 dy=32*/)
+            {
+                long dwidth = ((bipheader.iWidth + (dy - 2) - 1) / (dy - 2)) * dy;
+                long dheight = ((bipheader.iHeight + (dy - 2) - 1) / (dy - 2)) * dy;
+                long focus_H = (dwidth * dheight + dx - 1) / dx;
+                long focus_T = (focus_H + dy - 1) / dy;
+
+                for (int t = 0; t < focus_T; t++)
+                {
+                    for (int y = 0; y < dy; y++)
+                    {
+                        for (int x = 0; x < dx; x++)
+                        {
+                            var pixel = file.ReadBytes(m_bpp); //RGBA with wrong A
+                            long i2x = x + t * dx;
+                            long i3t = i2x / dwidth;
+                            long i3x = i2x - i3t * dwidth;
+                            long i3y = i3t * (dy - 2) + y;
+                            long i4x = i3x - i3x / dy * dy + i3x / dy * (dy - 2);
+                            if (i3x >= dwidth || i4x >= bipheader.iWidth || i3y >= bipheader.iHeight)
+                                continue;
+                            long target = (i4x + i3y * bipheader.iWidth) * m_bpp;
+                            if(m_bpp == 4)
+                            {
+                                //BGRA
+                                pixels[target] = pixel[2];
+                                pixels[target + 1] = pixel[1];
+                                pixels[target + 2] = pixel[0];
+                                if (pixel[3] >= byte.MaxValue / 2)
+                                    pixels[target + 3] = byte.MaxValue;
+                                else
+                                    pixels[target + 3] = (byte)(pixel[3] << 1);
+                            }
+                            else
+                            {
+                                pixels[target] = pixel[0];
+                            }
                         }
                     }
                 }
@@ -245,7 +267,7 @@ namespace GameRes.Formats.Kid
                 file.Seek(0x0C, SeekOrigin.Begin);
                 uint palettestart = file.ReadUInt16(); // usually 0x100
                 file.Seek(palettestart, SeekOrigin.Begin);
-                var color_map = ImageFormat.ReadColorMap(file.AsStream, 256, PaletteFormat.RgbA);
+                var color_map = ImageFormat.ReadColorMap(file.AsStream, 256, dy == 16 ? PaletteFormat.RgbA : PaletteFormat.RgbA7);
                 BitmapPalette Palette = new BitmapPalette(color_map);
 
                 return ImageData.Create(info, PixelFormats.Indexed8, Palette, pixels);
