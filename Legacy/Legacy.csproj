@@ -348,8 +348,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Bom\" />
-    <Folder Include="HyperWorks\" />
     <Folder Include="Nanami\" />
   </ItemGroup>
   <ItemGroup />
