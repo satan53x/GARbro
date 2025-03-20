@@ -6,7 +6,20 @@
     <Grid.ColumnDefinitions>
         <ColumnDefinition/>
         <ColumnDefinition/>
+        <ColumnDefinition/>
     </Grid.ColumnDefinitions>
-    <Label Content="Description" Target="{Binding ElementName=Version}" Grid.Column="0" Margin="0"/>
-    <TextBox Text="{Binding Source={x:Static p:Settings.Default}, Path=AOSDescription, Mode=TwoWay}" Width="200" Grid.Column="1" Margin="0"/>
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Version" Target="{Binding ElementName=Version}" Width="75" Margin="4"/>
+            <ComboBox Name="Version" Width="50" SelectedValuePath="Content" Margin="4" 
+          SelectedValue="{Binding Source={x:Static p:Settings.Default}, Path=AOSVersion, Mode=TwoWay}">
+                <ComboBoxItem Content="1"/>
+                <ComboBoxItem Content="2"/>
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Description" Target="{Binding ElementName=Description}" Width="75" Margin="4"/>
+            <TextBox Text="{Binding Source={x:Static p:Settings.Default}, Path=AOSDescription, Mode=TwoWay}" Width="200" Margin="4"/>
+        </StackPanel>
+    </StackPanel>
 </Grid>

@@ -203,11 +203,15 @@
     <Setting Name="AOSDescription" Type="System.String" Scope="User">
       <Value Profile="(Default)">scr.aos</Value>
     </Setting>
+    <Setting Name="AOSVersion" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
     <Setting Name="AFAEncodingCP" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">932</Value>
     </Setting>
     <Setting Name="ODNVersion" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3</Value>
+    </Setting>
     <Setting Name="DXAPassword" Type="System.String" Scope="User">
       <Value Profile="(Default)">DXARC</Value>
     </Setting>

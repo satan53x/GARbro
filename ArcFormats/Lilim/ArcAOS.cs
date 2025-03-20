@@ -109,12 +109,130 @@ namespace GameRes.Formats.Lilim
             var unpacked = new HuffmanStream (packed);
             return new LimitStream (unpacked, aent.UnpackedSize);
         }
+
+        public override void Create(Stream output, IEnumerable<Entry> list, ResourceOptions options,
+                                     EntryCallback callback)
+        {
+            int file_count = list.Count();
+            if (null != callback)
+                callback(file_count + 2, null, null);
+            //int callback_count = 0;
+            using (var writer = new BinaryWriter(output, Encoding.ASCII, true))
+            {
+                var encoding = Encodings.cp932;
+                byte[] name_buf = new byte[0x100];
+                byte[] padding_buf = new byte[0x10];
+
+                uint count = 0x20; // first chunck 0x20, other 0x1F
+                uint index_offset = 0;
+                uint index_size = count * 0x20;
+                uint base_offset = index_offset + index_size;
+                int entry_index = 0; 
+
+                foreach (var entry in list)
+                {
+                    writer.BaseStream.Position = base_offset;
+                    entry.Offset = base_offset;
+                    using (var input = File.OpenRead(entry.Name))
+                    {
+                        // write data
+                        var name = Path.GetFileName(entry.Name);
+                        uint size = (uint)input.Length;
+                        if (size > uint.MaxValue || base_offset + size > uint.MaxValue)
+                        {
+                            throw new FileSizeException();
+                        }
+                        bool tryPack = false;
+                        if (name.HasExtension(".scr"))
+                        {
+                            tryPack = true;
+                        }
+                        else if (name.HasExtension(".abm"))
+                        {
+                            entry.Name = Path.ChangeExtension(entry.Name, ".cmp");
+                        }
+                        if (tryPack)
+                        {
+                            byte[] unpacked = new byte[input.Length];
+                            input.Read(unpacked, 0, (int)input.Length);
+                            byte[] packed = HuffmanEncoder.HuffmanEncoding(unpacked);
+                            writer.Write(unpacked.Length);
+                            writer.Write(packed, 0, packed.Length);
+                            size = 4 + (uint)packed.Length;
+                        }
+                        else
+                        {
+                            input.CopyTo(output);
+                        }
+                        base_offset += size;
+                        entry.Size = size;
+                        // write padding
+                        uint p = 0x10 - entry.Size % 0x10;
+                        writer.Write(padding_buf, 0, (int)p);
+                        base_offset += p;
+
+                        // write index
+                        writer.BaseStream.Position = index_offset;
+                        name = Path.GetFileName(entry.Name);
+                        size = (uint)encoding.GetBytes(name, 0, name.Length, name_buf, 0);
+                        for (uint i = size; i < 0x10; ++i)
+                            name_buf[i] = 0;
+                        writer.Write(name_buf, 0, 0x10);
+                        index_offset += 0x20;
+                        writer.Write((uint)(entry.Offset - index_offset));
+                        writer.Write(entry.Size);
+                        writer.Write(padding_buf, 0, 8);
+
+                        entry_index++;
+                    }
+
+                    // chunck end
+                    if (entry_index >= count-1)
+                    {
+                        index_offset += 0x20;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            writer.Write(0xFFFFFFFF);
+                        }
+                        writer.Write(base_offset - index_offset); // next chunck offset
+                        writer.Write(0);
+                        writer.Write(padding_buf, 0, 8);
+                        // reset
+                        count = 0x1F;
+                        index_offset = base_offset;
+                        index_size = count * 0x20;
+                        base_offset = index_offset + index_size;
+                        entry_index = 0;
+                    }
+                }
+                // pad chunck
+                while (entry_index < count)
+                {
+                    writer.Write(padding_buf);
+                    writer.Write(padding_buf);
+                    entry_index++;
+                }
+            }
+        }
+
+        public override object GetCreationWidget()
+        {
+            return new GUI.CreateAOSWidget();
+        }
+
+        public override ResourceOptions GetDefaultOptions()
+        {
+            return new ArcOptions { 
+                Description = Properties.Settings.Default.AOSDescription,
+                Version = Properties.Settings.Default.AOSVersion
+            };
+        }
     }
 
     [Export(typeof(ArchiveFormat))]
     public class Aos2Opener : AosOpener
     {
-        public override string         Tag { get { return "AOSv2"; } }
+        public override string         Tag { get { return "AOS/LiLiM"; } }
         public override string Description { get { return "LiLiM resource archive version 2"; } }
         public override uint     Signature { get { return 0; } }
         public override bool  IsHierarchic { get { return false; } }
@@ -168,6 +286,13 @@ namespace GameRes.Formats.Lilim
         public override void Create(Stream output, IEnumerable<Entry> list, ResourceOptions options,
                                      EntryCallback callback)
         {
+            var arc_options = GetOptions<ArcOptions>(options);
+            if (arc_options.Version == 1)
+            {
+                base.Create(output, list, options, callback);
+                return;
+            }
+
             int file_count = list.Count();
             if (null != callback)
                 callback(file_count + 2, null, null);
@@ -186,7 +311,6 @@ namespace GameRes.Formats.Lilim
                 writer.Write(base_offset);
                 writer.Write(index_size);
                 // description
-                var arc_options = GetOptions<ArcOptions>(options);
                 encoding.GetBytes(arc_options.Description, 0, arc_options.Description.Length, name_buf, 0);
                 writer.Write(name_buf, 0, name_buf.Length);
 
@@ -248,20 +372,11 @@ namespace GameRes.Formats.Lilim
                 }
             }
         }
-
-        public override object GetCreationWidget()
-        {
-            return new GUI.CreateAOSWidget();
-        }
-
-        public override ResourceOptions GetDefaultOptions()
-        {
-            return new ArcOptions { Description = Properties.Settings.Default.AOSDescription };
-        }
     }
 
     public class ArcOptions : ResourceOptions
     {
         public string Description { get; set; }
+        public int Version { get; set; }
     }
 }
