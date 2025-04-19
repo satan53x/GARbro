@@ -136,6 +136,11 @@
     <Compile Include="Artemis\ImageNekoPNG.cs" />
     <Compile Include="CsWare\AudioWAV.cs" />
     <Compile Include="CsWare\ImageGDT.cs" />
+    <Compile Include="Cyberworks\ArcDATA.cs" />
+    <Compile Include="Cyberworks\ImageDATA.cs" />
+    <Compile Include="Cyberworks\WidgetBELLDATA.xaml.cs">
+      <DependentUpon>WidgetBELLDATA.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DigitalWorks\ArcPACsingle.cs" />
     <Compile Include="DigitalWorks\ArcPACPS2.cs" />
     <Compile Include="DigitalWorks\ImageTM2arc.cs" />
@@ -1162,6 +1167,10 @@
     <Page Include="CatSystem\CreateINTWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Cyberworks\WidgetBELLDATA.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Cyberworks\WidgetBELL.xaml">
       <SubType>Designer</SubType>

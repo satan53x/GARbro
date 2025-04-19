@@ -319,10 +319,17 @@ namespace GameRes.Formats.Cyberworks
             }
             else if (scheme != null && ('a' == type || 'd' == type) && input.Length > 21)
             {
-                int id = input.ReadByte();
-                if (id == scheme.Value2)
+                if (!scheme.UseDataDecoder) 
                 {
-                    return new AImageReader (input, scheme, type);
+                    int id = input.ReadByte();
+                    if (id == scheme.Value2)
+                    {
+                        return new AImageReader(input, scheme, type);
+                    }
+                }
+                else 
+                {
+                    return new DataImageDecoder(input,type);
                 }
             }
             input.Position = 0;
@@ -377,6 +384,7 @@ namespace GameRes.Formats.Cyberworks
         public byte     Value3;
         public byte[]   HeaderOrder;
         public bool     Flipped;
+        public bool     UseDataDecoder;
 
         public AImageScheme ()
         {
