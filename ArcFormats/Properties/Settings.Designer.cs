@@ -585,7 +585,20 @@ namespace GameRes.Formats.Properties {
                 this["BELLTitle"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BELLDATATitle 
+        {
+            get {
+                return ((string)(this["BELLDATATitle"]));
+            }
+            set {
+                this["BELLDATATitle"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
