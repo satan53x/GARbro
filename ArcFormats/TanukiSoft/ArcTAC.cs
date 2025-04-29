@@ -58,7 +58,7 @@ namespace GameRes.Formats.Tanuki
                 version = 100;
             else if (file.View.AsciiEqual (4, "1.10"))
                 version = 110;
-            else if (file.View.AsciiEqual(4, "1.20"))
+            else if (file.View.AsciiEqual (4, "1.20"))
                 version = 120;
             else
                 return null;
@@ -79,7 +79,7 @@ namespace GameRes.Formats.Tanuki
                     index_offset = 0x2C;
                     break;
                 case 120:
-                    index_offset = 0x30 + file.View.ReadUInt32(0x2C);
+                    index_offset = 0x30 + file.View.ReadUInt32 (0x2C);
                     break;
             };
             long base_offset = index_offset + index_size;
