@@ -979,6 +979,7 @@
     <Compile Include="Liar\ArcXFL.cs" />
     <Compile Include="KiriKiri\ArcXP3.cs" />
     <Compile Include="YuRis\ArcYPF.cs" />
+    <Compile Include="MOONSTONE\ArcPAK.cs" />
     <Compile Include="Macromedia\AudioEDIM.cs" />
     <Compile Include="Crowd\AudioEOG.cs" />
     <Compile Include="Entis\AudioMIO.cs" />
