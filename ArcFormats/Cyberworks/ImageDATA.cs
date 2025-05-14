@@ -241,6 +241,8 @@ namespace GameRes.Formats.Cyberworks
 
             var output_offset = 0;
             var pixel_offset = 0;
+            int paddingByte = ((m_info.iWidth * 3 + 3) & ~3) - (m_info.iWidth * 3);
+
             for (int y = 0; y < m_info.Height; y++)
             {
                 for (int x = 0; x < m_info.Width; x++)
@@ -252,6 +254,8 @@ namespace GameRes.Formats.Cyberworks
                     output_offset += 4;
                     pixel_offset += 3;
                 }
+
+                pixel_offset+=paddingByte;
             }
 
         }
