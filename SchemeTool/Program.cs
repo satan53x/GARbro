@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,44 +18,53 @@ namespace SchemeTool
             {
                 GameRes.FormatCatalog.Instance.DeserializeScheme(stream);
             }
-
-            GameRes.Formats.Malie.DatOpener format = GameRes.FormatCatalog.Instance.ArcFormats
-                .FirstOrDefault(a => a is GameRes.Formats.Malie.DatOpener) as GameRes.Formats.Malie.DatOpener;
+#if false
+            using (Stream stream = File.Create(".\\GameData\\Formats.json"))
+            {
+                GameRes.FormatCatalog.Instance.SerializeSchemeJson(stream);
+                return;
+            }
+#endif
+            GameRes.Formats.KiriKiri.Xp3Opener format = GameRes.FormatCatalog.Instance.ArcFormats
+                .FirstOrDefault(a => a is GameRes.Formats.KiriKiri.Xp3Opener) as GameRes.Formats.KiriKiri.Xp3Opener;
 
             if (format != null)
             {
                 GameRes.Formats.Malie.MalieScheme scheme = format.Scheme as GameRes.Formats.Malie.MalieScheme;
                 // Add scheme information here
-                byte[] key = {0xa4, 0xa7, 0xa6, 0xa1, 0xa0, 0xa3, 0xa2, 0xac, 0xaf, 0xae, 0xa9, 0xa8, 0xab, 0xaa, 0xb4, 0xb7, 0xb6, 0xb1, 0xb0, 0xb3, 0xb2, 0xbc, 0xbf, 0xbe, 0xb9, 0xb8, 0xbb, 0xba, 0xa1, 0xa9, 0xb1, 0xb9};
-                {
-                    uint[] rot_key = { 0x70752D37, 0x4A526B58, 0x7841457A, 0x67416155 };
-                    var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
-                    string name = "Silverio Ragnarok";
-                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
-                    scheme.KnownSchemes.Add(name, crypt);
-                }
-                {
-                    uint[] rot_key = { 0x62466D43, 0x2B347A65, 0x74456279, 0x6D467A6F };
-                    var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
-                    string name = "Silverio Vendetta -Verse of Orpheus-";
-                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
-                    scheme.KnownSchemes.Add(name, crypt);
-                }
-                {
-                    uint[] rot_key = { 0x372D3668, 0x336B6234, 0x6635662B, 0x78723869 };
-                    var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
-                    string name = "Silverio Trinity -Beyond the Horizon-";
-                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
-                    scheme.KnownSchemes.Add(name, crypt);
-                }
-                {
-                    uint[] rot_key = { 0x3C787768, 0x466E2D69, 0x35726440, 0x612B6743 };
-                    var crypt = new GameRes.Formats.Malie.LibCfiScheme(0x400, key, rot_key);
-                    string name = "Dies irae Interview with Kaziklu Bey [ENG]";
-                    if (scheme.KnownSchemes.ContainsKey(name)) scheme.KnownSchemes.Remove(name);
-                    scheme.KnownSchemes.Add(name, crypt);
-                }
 
+#if true
+                byte[] cb = File.ReadAllBytes(@"MEM_10014628_00001000.mem");
+                var cb2 = MemoryMarshal.Cast<byte, uint>(cb);
+                for (int i = 0; i < cb2.Length; i++)
+                    cb2[i] = ~cb2[i];
+                var cs = new GameRes.Formats.KiriKiri.CxScheme
+                {
+                    Mask = 0x000,
+                    Offset = 0x000,
+                    PrologOrder = new byte[] { 0, 1, 2 },
+                    OddBranchOrder = new byte[] { 0, 1, 2, 3, 4, 5 },
+                    EvenBranchOrder = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+                    ControlBlock = cb2.ToArray()
+                };
+                var crypt = new GameRes.Formats.KiriKiri.HxCrypt(cs);
+                crypt.RandomType = 0;
+                crypt.FilterKey = 0x0000000000000000;
+                crypt.NamesFile = "HxNames.lst";
+                var keyA1 = SoapHexBinary.Parse("0000000000000000000000000000000000000000000000000000000000000000").Value;
+                var keyA2 = SoapHexBinary.Parse("00000000000000000000000000000000").Value;
+                var keyB1 = SoapHexBinary.Parse("0000000000000000000000000000000000000000000000000000000000000000").Value;
+                var keyB2 = SoapHexBinary.Parse("00000000000000000000000000000000").Value;
+                crypt.IndexKeyDict = new Dictionary<string, GameRes.Formats.KiriKiri.HxIndexKey>()
+                {
+                    { "data.xp3", new GameRes.Formats.KiriKiri.HxIndexKey { Key1 = keyA1, Key2 = keyA2 } },
+                    { "update.xp3", new GameRes.Formats.KiriKiri.HxIndexKey { Key1 = keyB1, Key2 = keyB2 } },
+                };
+#else
+                GameRes.Formats.KiriKiri.ICrypt crypt = new GameRes.Formats.KiriKiri.XorCrypt(0x00);
+#endif
+
+                // scheme.KnownSchemes.Add("game title", crypt);
             }
 
             var gameMap = typeof(GameRes.FormatCatalog).GetField("m_game_map", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
@@ -63,7 +73,7 @@ namespace SchemeTool
             if (gameMap != null)
             {
                 // Add file name here
-                //gameMap.Add("game.exe", "game title");
+                // gameMap.Add("game.exe", "game title");
             }
 
             // Save database

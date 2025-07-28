@@ -585,7 +585,20 @@ namespace GameRes.Formats.Properties {
                 this["BELLTitle"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BELLDATATitle 
+        {
+            get {
+                return ((string)(this["BELLDATATitle"]));
+            }
+            set {
+                this["BELLDATATitle"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -886,6 +899,18 @@ namespace GameRes.Formats.Properties {
             }
             set {
                 this["NexasEncodingCP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("RGBA")]
+        public string TIM2AlphaFormat {
+            get {
+                return ((string)(this["TIM2AlphaFormat"]));
+            }
+            set {
+                this["TIM2AlphaFormat"] = value;
             }
         }
     }

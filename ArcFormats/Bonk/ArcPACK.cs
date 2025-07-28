@@ -76,7 +76,7 @@ namespace GameRes.Formats.Bonk
 
         IEnumerable<IndexRecord> LookupIndex (ArcView file)
         {
-            var arc_name = Path.GetFileName (file.Name);
+            var arc_name = Path.GetFileName (file.Name).ToLower();
             if (!arc_name.StartsWith ("data_") || !arc_name.EndsWith (".pack"))
                 return null;
             ArchiveRecord arc_record;

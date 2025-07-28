@@ -1,6 +1,6 @@
-//! \file       ArcPAC.cs
+//! \file       ArcPACPS2.cs
 //! \date       2018 Sep 18
-//! \brief      Digital Works resource archive.
+//! \brief      Digital Works PS2 resource archive.
 //
 // Copyright (C) 2018 by morkt
 //
@@ -31,44 +31,33 @@ using GameRes.Compression;
 namespace GameRes.Formats.DigitalWorks
 {
     [Export(typeof(ArchiveFormat))]
-    public class PacOpener : ArchiveFormat
+    public class PacSingleOpener : ArchiveFormat
     {
-        public override string         Tag { get { return "PAC/HED"; } }
-        public override string Description { get { return "Digital Works resource archive"; } }
-        public override uint     Signature { get { return 0; } } // 'PPAC-PAC'
+        public override string         Tag { get { return "PAC/LZS-TIM2"; } }
+        public override string Description { get { return "LZS-TIM2 Image archive"; } }
+        public override uint     Signature { get { return 0x535A4C; } } // 'LZS'
         public override bool  IsHierarchic { get { return false; } }
         public override bool      CanWrite { get { return false; } }
 
+        /**
+         Target games:
+        Cafe Little Wish SLPM-65294
+        F Fanatic SLPM-65296
+         */
+
         public override ArcFile TryOpen (ArcView file)
         {
-            if (!file.View.AsciiEqual (0, "PPAC-PAC") && !file.View.AsciiEqual(0, "FANA_V1.0.0.0"))
+            if (!file.View.AsciiEqual(9, "TIM2"))
                 return null;
-            var hed_name = Path.ChangeExtension (file.Name, "hed");
-            if (!VFS.FileExists (hed_name))
+            var dir = new List<Entry> (1);
+            var entry = FormatCatalog.Instance.Create<PackedEntry> (file.Name);
+            entry.Offset = 0L;
+            entry.Size   = (uint)file.MaxOffset;
+            if (!entry.CheckPlacement (file.MaxOffset))
                 return null;
-            using (var hed = VFS.OpenView (hed_name))
-            {
-                if (!hed.View.AsciiEqual (0, "PPAC-HED") && !hed.View.AsciiEqual(0, "FANA_V1.0.0.0"))
-                    return null;
-                uint index_offset = 0x10;
-                const uint data_offset = 0x10;
-                int count = (int)(hed.MaxOffset - index_offset) / 0x20;
-                if (!IsSaneCount (count))
-                    return null;
-                var dir = new List<Entry> (count);
-                while (index_offset+0x20 <= hed.MaxOffset)
-                {
-                    var name = hed.View.ReadString (index_offset, 0x10);
-                    var entry = FormatCatalog.Instance.Create<PackedEntry> (name);
-                    entry.Offset = hed.View.ReadUInt32 (index_offset+0x10) + data_offset;
-                    entry.Size   = hed.View.ReadUInt32 (index_offset+0x14);
-                    if (!entry.CheckPlacement (file.MaxOffset))
-                        return null;
-                    dir.Add (entry);
-                    index_offset += 0x20;
-                }
-                return new ArcFile (file, this, dir);
-            }
+            dir.Add (entry);
+            
+            return new ArcFile (file, this, dir);    
         }
 
         public override Stream OpenEntry (ArcFile arc, Entry entry)

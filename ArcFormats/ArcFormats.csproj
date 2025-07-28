@@ -51,6 +51,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Crc32C.NET, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Crc32C.NET.1.0.5.0\lib\net20\Crc32C.NET.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.3.3.11, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.1.3.3\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -62,10 +65,12 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Snappy.NET, Version=1.1.1.8, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Snappy.NET.1.1.1.8\lib\net45\Snappy.NET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\netstandard1.1\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -77,9 +82,16 @@
     <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
     </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net461\System.Security.Cryptography.Algorithms.dll</HintPath>
@@ -87,15 +99,8 @@
     <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\netstandard1.1\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -131,6 +136,14 @@
     <Compile Include="Artemis\ImageNekoPNG.cs" />
     <Compile Include="CsWare\AudioWAV.cs" />
     <Compile Include="CsWare\ImageGDT.cs" />
+    <Compile Include="Cyberworks\ArcDATA.cs" />
+    <Compile Include="Cyberworks\ImageDATA.cs" />
+    <Compile Include="Cyberworks\WidgetBELLDATA.xaml.cs">
+      <DependentUpon>WidgetBELLDATA.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DigitalWorks\ArcPACsingle.cs" />
+    <Compile Include="DigitalWorks\ArcPACPS2.cs" />
+    <Compile Include="DigitalWorks\ImageTM2arc.cs" />
     <Compile Include="DxLib\HuffmanDecoder.cs" />
     <Compile Include="DxLib\WidgetDXA.xaml.cs">
       <DependentUpon>WidgetDXA.xaml</DependentUpon>
@@ -141,8 +154,10 @@
     <Compile Include="GScripter\ArcDATA.cs" />
     <Compile Include="Ism\ImagePNG.cs" />
     <Compile Include="Kid\ArcDATRAW.cs" />
+    <Compile Include="Kid\ArcKLZ.cs" />
     <Compile Include="Kid\ImageBIP.cs" />
     <Compile Include="Kid\ImageBIParc.cs" />
+    <Compile Include="Kid\ImageKLZ.cs" />
     <Compile Include="Kid\ImageLBG.cs" />
     <Compile Include="Kid\ImageSPC.cs" />
     <Compile Include="Kogado\ArcARC.cs" />
@@ -191,6 +206,7 @@
     <Compile Include="MAGES\ArcLoveOnce.cs" />
     <Compile Include="MAGES\ImageBIN.cs" />
     <Compile Include="Mugi\ArcBIN.cs" />
+    <Compile Include="Musica\ArcPAK.cs" />
     <Compile Include="NipponIchi\ArcCASN.cs" />
     <Compile Include="NipponIchi\ArcPSFS.cs" />
     <Compile Include="NipponIchi\ImageNMT.cs" />
@@ -206,6 +222,10 @@
     <Compile Include="Valkyria\CreateODNWidget.xaml.cs">
       <DependentUpon>CreateODNWidget.xaml</DependentUpon>
     </Compile>
+    <Compile Include="VnMaker\ArcZIP.cs" />
+    <Compile Include="VnMaker\AudioMP3.cs" />
+    <Compile Include="VnMaker\AudioOGG.cs" />
+    <Compile Include="VnMaker\ImagePNG.cs" />
     <Compile Include="Xuse\ArcNT.cs" />
     <Compile Include="Xuse\ArcWVB.cs" />
     <Compile Include="Zyx\ImageXMG.cs" />
@@ -901,13 +921,13 @@
     <Compile Include="VnEngine\ArcAXR.cs" />
     <Compile Include="VnEngine\ImageZAW.cs" />
     <EmbeddedResource Include="Abogado\keytable.dat" />
-    <None Include="packages.config" />
     <EmbeddedResource Include="Strings\arcStrings.ja-JP.resx" />
     <EmbeddedResource Include="Unity\strings.dat" />
     <EmbeddedResource Include="ScrPlayer\ImgControlTable1" />
     <EmbeddedResource Include="ScrPlayer\ImgControlTable2" />
     <EmbeddedResource Include="ScrPlayer\ImgDeltaTable2" />
     <EmbeddedResource Include="ScrPlayer\ImgControlTable32" />
+    <None Include="packages.config" />
     <None Include="WebP\Alpha.cs" />
     <None Include="WebP\Decoder.cs">
       <SubType>Code</SubType>
@@ -970,6 +990,7 @@
     <Compile Include="Liar\ArcXFL.cs" />
     <Compile Include="KiriKiri\ArcXP3.cs" />
     <Compile Include="YuRis\ArcYPF.cs" />
+    <Compile Include="MOONSTONE\ArcPAK.cs" />
     <Compile Include="Macromedia\AudioEDIM.cs" />
     <Compile Include="Crowd\AudioEOG.cs" />
     <Compile Include="Entis\AudioMIO.cs" />
@@ -1158,6 +1179,10 @@
     <Page Include="CatSystem\CreateINTWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Cyberworks\WidgetBELLDATA.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Cyberworks\WidgetBELL.xaml">
       <SubType>Designer</SubType>
@@ -1351,6 +1376,12 @@ exit 0</PreBuildEvent>
 xcopy "$(ProjectDir)\Resources\Formats.dat" "$(TargetDir)\GameData\" /D /Y &gt;NUL</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\ZstdNet.1.4.5\build\ZstdNet.targets" Condition="Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ZstdNet.1.4.5\build\ZstdNet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
