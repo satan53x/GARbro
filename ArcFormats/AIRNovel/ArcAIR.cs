@@ -176,7 +176,7 @@ namespace GameRes.Formats.AirNovel
             }
         }
 
-        AirNovelScheme DefaultScheme = new AirNovelScheme { KnownKeys = new Dictionary<string, string>() };
+        public static AirNovelScheme DefaultScheme = new AirNovelScheme { KnownKeys = new Dictionary<string, string>() };
 
         internal IDictionary<string, string> KnownKeys { get { return DefaultScheme.KnownKeys; } }
 
@@ -188,14 +188,36 @@ namespace GameRes.Formats.AirNovel
 
         string QueryEncryptionKey (ArcView file)
         {
-            var title = FormatCatalog.Instance.LookupGame (file.Name);
-            if (string.IsNullOrEmpty (title))
-                return null;
-            string key;
-            if (!KnownKeys.TryGetValue (title, out key))
-                return null;
-            return key;
+            var options = Query<AirOptions>("RC4 plain key:");
+            return options.key;
+            //var title = FormatCatalog.Instance.LookupGame (file.Name);
+            //if (string.IsNullOrEmpty (title))
+            //    return null;
+            //string key;
+            //if (!KnownKeys.TryGetValue (title, out key))
+            //    return null;
+            //return key;
         }
+
+        public override object GetAccessWidget()
+        {
+            return new GUI.WidgetAIR();
+        }
+
+        public override ResourceOptions GetOptions(object w)
+        {
+            var widget = w as GUI.WidgetAIR;
+            if (null != widget)
+            {
+                return new AirOptions { key = widget.ValueTextBox.Text };
+            }
+            return this.GetDefaultOptions();
+        }
+    }
+
+    class AirOptions : ResourceOptions
+    {
+        public string key;
     }
 
     internal class AirRc4Crypt

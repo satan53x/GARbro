@@ -133,6 +133,9 @@
     <Compile Include="AdvSys\ImageGWD.cs" />
     <Compile Include="Ail\ArcLNK2.cs" />
     <Compile Include="AIRNovel\ArcAIR.cs" />
+    <Compile Include="AIRNovel\WidgetAIR.xaml.cs">
+      <DependentUpon>WidgetAIR.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Artemis\ImageNekoPNG.cs" />
     <Compile Include="CsWare\AudioWAV.cs" />
     <Compile Include="CsWare\ImageGDT.cs" />
@@ -1164,6 +1167,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="AIRNovel\WidgetAIR.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Amaterasu\CreateAMIWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
